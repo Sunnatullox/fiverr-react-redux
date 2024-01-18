@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import FiverrLogo from "./FiverrLogo";
 import SearchIcon from "@mui/icons-material/Search";
 
-
 function Navbar() {
   const [navFixed, setNavFixed] = useState(false);
 
