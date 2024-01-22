@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import FiverrLogo from "./FiverrLogo";
 import SearchIcon from "@mui/icons-material/Search";
+import HeaderMenu from "./HeaderMenu";
 
 function Navbar() {
   const [navFixed, setNavFixed] = useState(false);
@@ -117,6 +118,7 @@ const link =[
           </ul>
         </nav>
       </div>
+      <HeaderMenu show={navFixed}/>
     </div>
   );
 }

@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.slick-track{
+    display: flex !important;
+}
+
+.slick-prev, .slick-next {
+    position: absolute;
+    top: 12px !important;
+    padding: 5px;
+    background-color:rgba(197, 195, 195, 0.6);
+    border-radius:50%;
+    z-index: 5;
+}
+
+.slick-prev {
+    left: 10px !important;
+}
+.slick-next {
+    right: 10px !important;
+}
+
+.slick-slider .slick-slide{
+    width: auto !important;
+}
+.slick-slider{
+padding-top: 5px;
+}
