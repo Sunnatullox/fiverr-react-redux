@@ -3,23 +3,24 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import { Navbar, Footer } from "./components";
 import { useEffect } from "react";
-import { getCategorys } from "./redux/slice/categorysSlice";
-import {useDispatch} from 'react-redux'
+import { getCategorys, getPopularCategorys } from "./redux/slice/categorysSlice";
+import { useDispatch } from "react-redux";
 
 function App() {
-   const dispatch = useDispatch()
-  useEffect(() => {
-    dispatch(getCategorys())
-  }, [])
+  const dispatch = useDispatch();
 
-  
+  useEffect(() => {
+    dispatch(getCategorys());
+    dispatch(getPopularCategorys());
+  }, []);
+
   return (
     <BrowserRouter>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
       </Routes>
-        <Footer />
+      <Footer />
     </BrowserRouter>
   );
 }

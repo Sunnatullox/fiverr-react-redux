@@ -35,7 +35,7 @@ categorysRoute.get(
 );
 categorysRoute.get("/get-categorys", getCategorys);
 categorysRoute.get("/get-sub-category", getSingleCategory);
-categorysRoute.get("/get-pupular-sub-categorys", getPopularCategorys);
+categorysRoute.get("/get-popular-sub-categorys", getPopularCategorys);
 categorysRoute.get("/get-sub-categorys", getSubCategorys);
 
 export default categorysRoute;

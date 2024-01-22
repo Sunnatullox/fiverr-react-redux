@@ -74,7 +74,7 @@ const link =[
         </Link>
         <div
           className={`flex relative w-full ${
-            !navFixed ? "opacity-10" : "opacity-0"
+            navFixed ? "opacity-10" : "opacity-0"
           }`}
         >
           <input
@@ -95,7 +95,7 @@ const link =[
                 <li
                   key={linkName}
                   className={`${
-                    !navFixed ? "text-gray" : "text-white"
+                    navFixed ? "text-gray" : "text-white"
                   } font-medium pr-6`}
                 >
                   {type === "link" && (

@@ -1,9 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { handleGetCategorys } from "../service/categorysService";
+import { getPopularCategoryService, handleGetCategorys } from "../service/categorysService";
 
 const initialState = {
   isLoading: false,
   categorysAll: [],
+  popularCategorys:[],
   isError: false,
   isSuccess: false,
   message: "",
@@ -16,6 +17,14 @@ export const getCategorys = createAsyncThunk("categorys/get", async (thunkApi) =
     return thunkApi.rejectWithValue(error);
   }
 });
+
+export const getPopularCategorys = createAsyncThunk("categorys/get-popular", async(thunkApi) => {
+  try {
+    return await getPopularCategoryService()
+  } catch (error) {
+    return thunkApi.rejectWithValue(error);
+  }
+})
 
 export const categorysSlice = createSlice({
   name: "categorys",
@@ -33,6 +42,16 @@ export const categorysSlice = createSlice({
       }).addCase(getCategorys.rejected, (state, action) =>{
         state.isLoading=false,
         state.isError = action.error
+      }).addCase(getPopularCategorys.pending, (state) => {
+        state.isLoading=true
+      }).addCase(getPopularCategorys.fulfilled,(state,action) =>{
+        state.isLoading = false,
+        state.popularCategorys=action.payload
+        state.isSuccess=true
+      }).addCase(getPopularCategorys.rejected, (state, action) => {
+        state.isLoading=false,
+        state.isError=true
+        state.message=action.error
       });
   },
 });

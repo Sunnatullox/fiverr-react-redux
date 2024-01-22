@@ -256,8 +256,8 @@ export const getSingleCategory = asyncHandler(async (req, res) => {
 
 export const getPopularCategorys = asyncHandler(async (req, res) => {
   try {
-    const polularCategorys = await SubCategory.find({ isPopular: true }).exec();
-    return res.json({ polularCategorys });
+    const popularCategorys = await SubCategory.find({ isPopular: true }).exec();
+    return res.json({ popularCategorys });
   } catch (error) {
     console.log(error);
     throw new Error("Internal server error.");
