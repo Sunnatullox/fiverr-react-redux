@@ -7,11 +7,10 @@ import { Link } from "react-router-dom";
 function HeaderMenu({ show }) {
   const { categorysAll } = useSelector((state) => state.categorys);
 
-  console.log(categorysAll);
+
   return (
     <div
-      style={{ padding: "12px 40px", borderTop: "1px solid #0003" }}
-      className={`px-8 mt-2  box-border w-full m-0 outline-0 p-0 whitespace-pre flex top-20 z-[11] transition-[hidden] duration-300 ${
+      className={`border-t border-[#0003] px-[40px] py-[12px] mt-2  box-border w-full m-0 outline-0 p-0 whitespace-pre flex top-20 z-[11] transition-[hidden] duration-300 ${
         show ? "fixed bg-white border-gray-200" : "hidden"
       }`}
     >

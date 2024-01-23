@@ -1,12 +1,14 @@
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 
 const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => {
+
   return (
     <button
       {...props}
       className={`slick-prev slick-arrow ${
-        currentSlide === 0 ? "slick-disabled" : ""
+        currentSlide === 0 ? "slick-disabled hidden" : ""
       }`}
+      // style={ currentSlide === 0 ? { display:"none"}: {}}
       aria-hidden="true"
       aria-disabled={currentSlide === 0 ? true : false}
       type="button"
@@ -17,11 +19,13 @@ const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => {
 };
 
 const SlickArrowRight = ({ currentSlide, slideCount, ...props }) => {
+
     return (
         <button 
         {...props}
-        className={`slick-next slick-arrow ${currentSlide === slideCount -1 ? "slick-disabled" : ""}`}
+        className={`slick-next slick-arrow ${currentSlide === slideCount -1 ? "slick-disabled hidden" : ""}`}
         aria-hidden="true"
+        // style={currentSlide === slideCount -1 ? { display:"none"} : {}}
         aria-disabled={currentSlide === slideCount -1 ? true : false}
         type="button"
         >
@@ -34,7 +38,7 @@ export const settings = {
   infinite: false,
   initialSlide: 0,
   slidesToShow: 8.5,
-  slidesToScroll: 2,
+  slidesToScroll: 1,
   speed: 500,
   prevArrow: <SlickArrowLeft />,
   nextArrow: <SlickArrowRight />,
