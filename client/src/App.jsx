@@ -16,15 +16,18 @@ function App() {
     dispatch(getPopularCategorys());
   }, []);
 
+  
+  
+
   return (
     <BrowserRouter>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
       </Routes>
-        {!showLogin && (
+        {showLogin || showRegister ? (
           <AuthWrapper type={showLogin ? "login" : "register"}/>
-        )}
+        ): null}
       <Footer />
     </BrowserRouter>
   );

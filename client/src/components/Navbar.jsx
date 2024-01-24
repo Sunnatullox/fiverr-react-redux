@@ -3,9 +3,12 @@ import { Link } from "react-router-dom";
 import FiverrLogo from "./FiverrLogo";
 import SearchIcon from "@mui/icons-material/Search";
 import HeaderMenu from "./HeaderMenu";
+import { useDispatch } from "react-redux";
+import { handleShowLogin, handleShowRegister } from "../redux/slice/authSlice";
 
 function Navbar() {
   const [navFixed, setNavFixed] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const positionNavbar = () => {
@@ -21,45 +24,45 @@ function Navbar() {
   }, [window.location.pathname]);
 
   const handleLogin = () => {
-    
-  }
-  
+    dispatch(handleShowLogin(true));
+  };
+
   const handleSignup = () => {
+    dispatch(handleShowRegister(true));
+  };
 
-  }
-
-const link =[
+  const link = [
     {
-        linkName:"Fiverr Business",
-        handler:"#",
-        type:"link"
+      linkName: "Fiverr Business",
+      handler: "#",
+      type: "link",
     },
     {
-        linkName:"Explore",
-        handler:"#",
-        type:"link"
+      linkName: "Explore",
+      handler: "#",
+      type: "link",
     },
     {
-        linkName:"English",
-        handler:"#",
-        type:"link"
+      linkName: "English",
+      handler: "#",
+      type: "link",
     },
     {
-        linkName:"Become a Seller",
-        handler:"#",
-        type:"link"
+      linkName: "Become a Seller",
+      handler: "#",
+      type: "link",
     },
     {
-        linkName:"Sign In",
-        handler:handleLogin,
-        type:"button"
+      linkName: "Sign In",
+      handler: handleLogin,
+      type: "button",
     },
     {
-        linkName:"Join",
-        handler:handleSignup,
-        type:"button2"
+      linkName: "Join",
+      handler: handleSignup,
+      type: "button2",
     },
-]
+  ];
 
   return (
     <div>
@@ -99,18 +102,23 @@ const link =[
                     navFixed ? "text-gray" : "text-white"
                   } font-medium pr-6`}
                 >
-                  {type === "link" && (
-                    <Link to={handler}>{linkName}</Link>
-                  )}
+                  {type === "link" && <Link to={handler}>{linkName}</Link>}
                   {type === "button" && (
                     <button onClick={handler}>{linkName}</button>
                   )}
                   {type === "button2" && (
-                    <button onClick={handler} className={`border text-md font-semibold py-1 px-3 rounded-sm ${
-                      navFixed ? "border-[#1DBF73] text-[#1DBF73]":"border-white text-white"
-                    }
+                    <button
+                      onClick={handler}
+                      className={`border text-md font-semibold py-1 px-3 rounded-sm ${
+                        navFixed
+                          ? "border-[#1DBF73] text-[#1DBF73]"
+                          : "border-white text-white"
+                      }
                     hover:bg-[#1DBF73] hover:text-white hover:border-[#1DBF73] transition-all duration-500
-                    `}>{linkName}</button>
+                    `}
+                    >
+                      {linkName}
+                    </button>
                   )}
                 </li>
               );
@@ -118,7 +126,7 @@ const link =[
           </ul>
         </nav>
       </div>
-      <HeaderMenu show={navFixed}/>
+      <HeaderMenu show={navFixed} />
     </div>
   );
 }
