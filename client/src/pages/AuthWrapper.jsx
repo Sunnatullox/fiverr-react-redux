@@ -1,19 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { Close, Facebook, Google } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
-import { handleLogin, handleShowLogin, handleShowRegister } from "../redux/slice/authSlice";
+import {
+  handleLogin,
+  handleShowLogin,
+  handleShowRegister,
+} from "../redux/slice/authSlice";
 import { useSelector } from "react-redux";
-import * as yup from 'yup'
+import * as yup from "yup";
 import { useFormik } from "formik";
+import { toast } from "react-toastify";
 
 const authSchema = yup.object().shape({
-  email: yup.string().email("Emil should be valid").required("Email is required"),
+  email: yup
+    .string()
+    .email("Emil should be valid")
+    .required("Email is required"),
   password: yup.string().required("Password is required"),
-}) 
+});
 
 function AuthWrapper({ type }) {
   const [errorMessage, setErrorMessage] = useState(null);
-  const { showLogin, showRegister } = useSelector((state) => state.auth);
+  const { showLogin, showRegister, isSuccess, message, isError } = useSelector(
+    (state) => state.auth
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -44,17 +54,36 @@ function AuthWrapper({ type }) {
     };
   }, [showLogin, showRegister]);
 
-
   const formik = useFormik({
-    initialValues:{
-      email:"",
-      password:"",
+    initialValues: {
+      email: "",
+      password: "",
     },
-    validationSchema:authSchema,
-    onSubmit:(values) => {
-      dispatch(handleLogin(values, type))
+    validationSchema: authSchema,
+    onSubmit: (values) => {
+      handleAuth(values);
+    },
+  });
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(message);
+      formik.setFieldValue("email", "");
+      formik.setFieldValue("password", "");
     }
-  })
+  }, [isSuccess, isError]);
+
+  useEffect(() => {
+    if(isError) {
+      setErrorMessage(message);
+      toast.error(message);
+    }
+  }, [message, isError]);
+
+  function handleAuth(data) {
+    if (data.email.trim() !== "" && data.password.trim() !== "")
+      dispatch(handleLogin({ values: data, type }));
+  }
 
   const authModalHidden = () => {
     type === "login"
@@ -97,7 +126,10 @@ function AuthWrapper({ type }) {
               </button>
             </div>
           </div>
-          <form onSubmit={formik.handleSubmit} className="flex flex-col justify-center items-center p-8 gap-7">
+          <form
+            onSubmit={formik.handleSubmit}
+            className="flex flex-col justify-center items-center p-8 gap-7"
+          >
             <div className="relative w-full text-center">
               <span className="before:content-[''] before:h-[0.5px] before:w-80 before:absolute before:top-[50%] before:left-0 before:bg-slate-400">
                 <span className="bg-white relative z-10 px-2">OR</span>

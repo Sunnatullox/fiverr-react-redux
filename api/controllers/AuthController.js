@@ -11,19 +11,25 @@ export const signUp = asyncHandler(async (req, res, next) => {
 
     if (!password) {
       res.status(400);
-      throw new Error("Please enter your password");
+      const err =  new Error("Please enter your password");
+      next(err);
+      throw err;
     }
 
     if (!email) {
       res.status(400);
-      throw new Error("Please enter your email address");
+      const err =  new Error("Please enter your email address");
+      next(err);
+      throw err;
     }
 
     const findUser = await User.findOne({ email });
-
+    
     if (findUser) {
-      res.status(400);
-      throw new Error("Sorry, email already exists, please try again");
+      res.status(400)
+      const err = new Error("Sorry, email already exists, please try again");
+      next(err)
+      throw err
     }
 
     const user = new User({
@@ -34,17 +40,12 @@ export const signUp = asyncHandler(async (req, res, next) => {
     const savedUser = await user.save();
 
     if (savedUser) {
-      const jwtToken = await createToken(savedUser.email, savedUser._id);
-      res.status(201).json({
-        user: {
-          id: savedUser._id,
-          email: savedUser.email,
-        },
-        jwt: jwtToken,
-      });
+      res.status(201).json({status: true, message:"Sign Up successfully"});
     } else {
-      res.status(500);
-      throw new Error("Failed to save user");
+      res.status(400);
+      const err  = new Error("Failed to save user");
+      next(err);
+      throw err
     }
   } catch (error) {
     res.status(500);
