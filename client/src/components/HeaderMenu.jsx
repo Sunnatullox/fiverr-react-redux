@@ -1,35 +1,54 @@
-import React from "react";
+import React, { useState } from "react";
 import Slider from "react-slick";
 import { useSelector } from "react-redux";
-import { settings } from "../utils/categories";
+import { breakpoints } from "../utils/categories";
 import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import { useNavigate  } from 'react-router-dom';
+
+
 
 function HeaderMenu({ show }) {
   const { categorysAll } = useSelector((state) => state.categorys);
 
+  const navigation = useNavigate();
+  
+
 
   return (
     <div
-      className={`border-t border-[#0003] px-[40px] py-[12px] mt-2  box-border w-full m-0 outline-0 p-0 whitespace-pre flex top-20 z-[11] transition-[hidden] duration-300 ${
+      className={`border-t border-[#0003] px-[40px] pt-[12px] mt-2  box-border w-full m-0 outline-0 p-0 whitespace-pre flex top-20 z-[11] transition-[hidden] duration-300 ${
         show ? "fixed bg-white border-gray-200" : "hidden"
       }`}
     >
-      <Slider className="w-full block" {...settings}>
+      <Swiper
+        breakpoints={breakpoints}
+        spaceBetween={30}
+        keyboard={{
+          enabled: true,
+        }}
+        navigation={true}
+        modules={[Navigation]}
+        className="mySwiper w-full h-full flex"
+      >
         {categorysAll.map((category) => (
-          <span
-            key={category._id}
-            className="peer group items-center justify-between space-x-5 bg-white px-4 relative group w-max"
-          >
-            <Link
-            to=""
-              className="pl-0 menu-hover py-2 text-base font-medium text-gray-500"
-            >
-              {category?.title}
-              <span className="absolute -bottom-1 left-0 w-0 h-1 bg-green-500 transition-all group-hover:w-full top-8"/>
-            </Link>
-          </span>
+          <SwiperSlide key={category._id} className="mx-4 w-full">
+            <span className="peer group items-center justify-between space-x-5 bg-white px-4 relative group w-max">
+              <a
+                onClick={() => navigation(`/search?category=${category.slug}`)}
+                className="pl-0 menu-hover py-2 text-base font-medium text-gray-500"
+              >
+                {category?.title}
+                <span className="absolute -bottom-1 left-0 w-0 h-1 bg-green-500 transition-all group-hover:w-full top-8"></span>
+              </a>
+            </span>
+          </SwiperSlide>
         ))}
-      </Slider>
+      </Swiper>
     </div>
   );
 }

@@ -2,30 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
-
-.slick-track{
-    display: flex !important;
+.swiper {
+  padding-bottom: 8px !important;
+  width: 100%;
+  height: 100%;
 }
 
-.slick-prev, .slick-next {
-    position: absolute;
-    top: 12px !important;
-    padding: 5px;
-    background-color:rgba(197, 195, 195, 0.6);
-    border-radius:50%;
-    z-index: 5;
+.swiper-wrapper {
+  padding-left: 25px;
+}
+.swiper-button-disabled {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease-in-out;
 }
 
-.slick-prev {
-    left: 10px !important;
-}
-.slick-next {
-    right: 10px !important;
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  display: inline-flex !important;
+  position: relative;
+  padding: 10px !important;
+  width: 30px;
+  height: 30px;
+  background: rgb(62 62 62 / 45%);
+  font-size: 13px !important;
+  font-weight: bold;
+  color: #fff;
+  border-radius: 50%;
+  opacity: 1;
+  transition: opacity 0.4s ease-in-out;
 }
 
-.slick-slider .slick-slide{
-    width: auto !important;
+.swiper-button-next.swiper-button-disabled::after,
+.swiper-button-prev.swiper-button-disabled::after {
+  opacity: 0;
 }
-.slick-slider{
-padding-top: 5px;
+
+@media screen and (min-width: 1500px) {
+  .swiper-wrapper {
+    justify-content: center;
+  }
+}
+.swiper-slide {
+  text-align: center;
+  margin: 0 !important;
+  flex-basis: content;
+  width: 100%;
+  font-size: 18px;
+  background: #fff;
+  display: inline-flex !important;
+  justify-content: center;
+  align-items: center;
 }
