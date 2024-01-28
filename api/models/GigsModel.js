@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const gigSchema = new mongoose.Schema({
   _id: {
@@ -18,16 +18,25 @@ const gigSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  images: [String],
+  images: [
+    {
+      public_id: {
+        type: String,
+      },
+      url: {
+        type: String,
+      },
+    },
+  ],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
   },
-  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
-  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
-  wishList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WishList' }],
+  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }],
+  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
+  wishList: [{ type: mongoose.Schema.Types.ObjectId, ref: "WishList" }],
 });
 
-const Gig = mongoose.model('Gig', gigSchema);
+const Gig = mongoose.model("Gig", gigSchema);
 
-export default  Gig;
+export default Gig;

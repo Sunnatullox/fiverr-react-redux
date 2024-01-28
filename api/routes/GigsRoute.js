@@ -1,5 +1,4 @@
 import { Router } from "express";
-import multer from "multer";
 import { adminVerify, verfyToken } from "../middleware/AuthMiddleware.js";
 import {
   addReview,
@@ -13,15 +12,18 @@ import {
   searchGigs,
   updateGig,
 } from "../controllers/GigsController.js";
+import multer from "multer";
 
 const gigsRoute = Router();
-const uploads = multer({ dest: "uploads/" });
 
-gigsRoute.post("/add", verfyToken, uploads.array("images"), createGigs);
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+gigsRoute.post("/add", verfyToken,upload.array("images"), createGigs);
 gigsRoute.get("/get-user-gigs", verfyToken, getUserAuthGigs);
 gigsRoute.put("/get-popular-gigs", verfyToken, getPopularGigs);
 gigsRoute.get("/get-gig-data/:gigId", getSingleGigDate);
-gigsRoute.put("/edit-gig/:gigId", verfyToken,uploads.array("images"), updateGig);
+gigsRoute.put("/edit-gig/:gigId", verfyToken,upload.array("images"), updateGig);
 gigsRoute.get("/search-gigs", searchGigs);
 gigsRoute.get("/check-gig-order/:gigId", verfyToken, checkGigOrder);
 gigsRoute.post("/add-review/:gigId", verfyToken, addReview);

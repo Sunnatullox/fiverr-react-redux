@@ -6,8 +6,7 @@ import User from "../models/UserModel.js";
 export const addMessage = asyncHandler(async (req, res) => {
   try {
     if (!req.body.recipentId || !req.body.message || !req.params.id) {
-      res.status(400);
-      throw new Error("Missing required fields.");
+      return next(new ErrorHandler("Missing required fields.",400));
     }
 
     const message = new Message({
@@ -41,8 +40,7 @@ export const addMessage = asyncHandler(async (req, res) => {
 export const getMessages = asyncHandler(async (req, res) => {
   try {
     if (!req.params.id) {
-      res.status(400);
-      throw new Error("Missing required fields.");
+      return next(new ErrorHandler("Missing required fields.",400));
     }
 
     const messages = await Message.find({ order: req.params.id })
@@ -102,7 +100,7 @@ export const markAsRead = asyncHandler(async (req, res) => {
   try {
     if (!req.params.messageId) {
       res.status(400);
-      throw new Error("Message ID is required");
+      return next(new ErrorHandler("Message ID is required",400));
     }
 
     const message = await Message.findByIdAndUpdate(
@@ -112,8 +110,7 @@ export const markAsRead = asyncHandler(async (req, res) => {
     );
 
     if (!message) {
-      res.status(404);
-      throw new Error("Message not found");
+      return next(new ErrorHandler("Message not found",400));
     }
 
     return res.json({ message: "Message marked as read" });
@@ -131,6 +128,6 @@ try {
   }).populate("sender order").lean();
   res.json(unreadMessages);
 } catch (error) {
-  throw new Error("Internal server error");
+  return next(new ErrorHandler("Internal server error",400));
 }
 })

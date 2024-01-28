@@ -8,8 +8,10 @@ export const handleRegisterService = async ({ email, password }) => {
   );
   return res;
 };
+
+
 export const handleLoginService = async ({ email, password }) => {
-  const res = await axios.post(LOGIN_ROUTE
+  const res = await axios.post(LOGIN_ROUTE,
     { email, password },
     { withCredentials: true }
   );

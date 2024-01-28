@@ -7,24 +7,21 @@ import Review from "../models/ReviewsModel.js";
 import Message from "../models/MessagesModel.js";
 import Category from "../models/CategorysModel.js";
 import SubCategory from "../models/SubCategorysModel.js";
+import { deleteFileFromFirebaseStorage, uploadFileToFirebaseStorage } from "../utils/firebase.js";
+import ErrorHandler from "../middleware/ErrorHandler.js";
 
 export const createGigs = asyncHandler(async (req, res, next) => {
   try {
-    if (!req.files || !req.query) {
-      throw new Error("All properties should be required");
+    if (!req.files || !req.body) {
+      return next(new ErrorHandler("All properties should be required"), 400);
     }
-    const fileKeys = Object.keys(req.files);
+
     const fileNames = [];
 
-    fileKeys.forEach((file) => {
-      const date = Date.now();
-      renameSync(
-        req.files[file].path,
-        "uploads/" + date + req.files[file].originalname
-      );
-      fileNames.push(date + req.files[file].originalname);
-    });
-
+    for (let image of req.files) {
+      const imageUrl = await uploadFileToFirebaseStorage(image);
+      fileNames.push(imageUrl);
+    }
     const {
       title,
       description,
@@ -35,7 +32,7 @@ export const createGigs = asyncHandler(async (req, res, next) => {
       time,
       shortDesc,
       subCategory,
-    } = req.query;
+    } = req.body;
 
     const { _id } = req.user;
     const user = await User.findById({ _id: _id });
@@ -46,7 +43,7 @@ export const createGigs = asyncHandler(async (req, res, next) => {
       deliveryTime: parseInt(time),
       category,
       subCategory,
-      features,
+      features: features.split(","),
       price: parseInt(price),
       shortDesc,
       revisions: parseInt(revisions),
@@ -60,7 +57,7 @@ export const createGigs = asyncHandler(async (req, res, next) => {
     return res.status(201).json("Successfully created the Gig");
   } catch (error) {
     console.log(error);
-    throw new Error("Internal server error.");
+    return next(new ErrorHandler("Internal server error."), 500);
   }
 });
 
@@ -76,8 +73,7 @@ export const getUserAuthGigs = asyncHandler(async (req, res, next) => {
       });
     return res.status(200).json({ gigs: user.gigs ?? [] });
   } catch (error) {
-    console.log(error);
-    throw new Error(`Internal server error.`);
+    return next(new ErrorHandler("Internal server error."), 500);
   }
 });
 
@@ -85,9 +81,12 @@ export const getSingleGigDate = asyncHandler(async (req, res, next) => {
   try {
     if (!req.params.gigId) {
       res.status(400);
-      throw new Error("Gig ID must be provided in the request");
+      return next(
+        new ErrorHandler("Gig ID must be provided in the request"),
+        400
+      );
     }
-    
+
     const gig = await Gig.findById(req.params.gigId)
       .populate("createdBy reviews")
       .populate({
@@ -103,7 +102,7 @@ export const getSingleGigDate = asyncHandler(async (req, res, next) => {
       })
       .populate({ path: "reviews", populate: { path: "reviewer" } });
 
-      const gigs = Array.isArray(userWithGigs.gigs) ? userWithGigs.gigs : [];
+    const gigs = Array.isArray(userWithGigs.gigs) ? userWithGigs.gigs : [];
 
     const totalReviews = gigs.reduce((acc, gig) => acc + gig.reviews.length, 0);
     const averageRating =
@@ -120,7 +119,6 @@ export const getSingleGigDate = asyncHandler(async (req, res, next) => {
           ).toFixed(1)
         : 0;
 
-
     return res.json({
       gig: {
         ...gig.toObject(),
@@ -129,26 +127,22 @@ export const getSingleGigDate = asyncHandler(async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.log(error);
-    throw new Error("Internal server error.");
+    return next(new ErrorHandler("Internal server error."), 500);
   }
 });
 
 export const updateGig = asyncHandler(async (req, res, next) => {
   try {
-    if (!req.files) throw new Error("All properties should be required");
-    const fileKeys = Object.keys(req.files);
-    const fileNames = [];
-    fileKeys.forEach((file) => {
-      const date = Date.now();
-      renameSync(
-        req.files[file].path,
-        "uploads/" + date + req.files[file].originalname
-      );
-      fileNames.push(date + req.files[file].originalname);
-    });
+    if (!req.files)
+      return next(new ErrorHandler("All properties should be required"), 400);
 
-    if (!req.query) throw new Error("Gigs require a query parameter");
+    const imageOld = JSON.parse(req.body?.oldImages)
+    const fileNames = imageOld.length > 0 ?  [...imageOld] : [];
+
+    for (let file of req.files) {
+      const images = await uploadFileToFirebaseStorage(file);
+      fileNames.push(images);
+    }
     const {
       title,
       description,
@@ -158,7 +152,11 @@ export const updateGig = asyncHandler(async (req, res, next) => {
       revisions,
       time,
       shortDesc,
-    } = req.query;
+      subCategory
+    } = req.body;
+
+    if (!req.body)
+      return next(new ErrorHandler("Gigs require a query parameter"), 400);
     const { _id } = req.user;
 
     const oldGig = await Gig.findById(req.params.gigId);
@@ -170,7 +168,8 @@ export const updateGig = asyncHandler(async (req, res, next) => {
         description: description || oldGig.description,
         deliveryTime: parseInt(time) || oldGig.deliveryTime,
         category: category || oldGig.category,
-        features: features || oldGig.features,
+        subCategory: subCategory || oldGig.subCategory, 
+        features: features.split(',') || oldGig.features,
         price: parseInt(price) || oldGig.price,
         shortDesc: shortDesc || oldGig.shortDesc,
         revisions: parseInt(revisions) || oldGig.revisions,
@@ -180,14 +179,15 @@ export const updateGig = asyncHandler(async (req, res, next) => {
       { new: true }
     );
 
-    oldGig.images.forEach((gigImg) => {
-      if (existsSync(`uploads/${gigImg}`)) unlinkSync(`uploads/${gigImg}`);
-    });
+     const removeImage =  await compareArrays(imageOld, oldGig.images)
+     for(let item of removeImage){
+      await deleteFileFromFirebaseStorage(item.public_id)
+     }
 
-    return res.status(201).json("Successfully updated the Gig");
+    return res.status(200).json("Successfully updated the Gig");
   } catch (error) {
     console.log(error);
-    throw new Error(`Internal server error.`);
+    return next(new ErrorHandler("Internal server error."), 500);
   }
 });
 
@@ -205,8 +205,12 @@ export const searchGigs = asyncHandler(async (req, res, next) => {
   const limit = limitGig || 9;
   const currentPage = page || 1;
   if (!searchTerm && !category && !subCategory) {
-    res.status(400);
-    throw new Error("Search term must be specified for the Gig search term.");
+    return next(
+      new ErrorHandler(
+        "Search term must be specified for the Gig search term."
+      ),
+      400
+    );
   }
 
   try {
@@ -333,8 +337,7 @@ export const searchGigs = asyncHandler(async (req, res, next) => {
       res.json({ gigs: searchGig, totalGigs, totalPages });
     }
   } catch (error) {
-    console.log(error);
-    throw new Error(`Internal server error.`);
+    return next(new ErrorHandler("Internal server error."), 500);
   }
 });
 
@@ -406,8 +409,7 @@ export const addReview = asyncHandler(async (req, res) => {
 
     return res.json({ newReview });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Internal server error." });
+    return next(new ErrorHandler("Internal server error."), 500);
   }
 });
 
@@ -478,11 +480,9 @@ export const getPopularGigs = asyncHandler(async (req, res) => {
 
     return res.json(gigs);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Internal server error." });
+    return next(new ErrorHandler("Internal server error."), 500);
   }
 });
-
 
 export const removeGigReview = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -494,8 +494,7 @@ export const removeGigReview = asyncHandler(async (req, res) => {
       res.status(404).json({ msg: "Review not found" });
     }
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ msg: `Internal server error for deleting ${id}` });
+    return next(new ErrorHandler("Internal server error."), 500);
   }
 });
 
@@ -504,16 +503,19 @@ export const deleteUserGig = asyncHandler(async (req, res) => {
   const role = req.user.role;
   try {
     if (role !== "ADMIN") {
-      throw new Error("You must have admin privileges to delete a gig");
+      return next(
+        new ErrorHandler("You must have admin privileges to delete a gig"),
+        400
+      );
     }
     if (!id) {
-      throw new Error("Gig ID not specified");
+      return next(new ErrorHandler("Gig ID not specified"), 400);
     }
 
     const gig = await Gig.findById(id).populate("orders");
 
     if (!gig) {
-      throw new Error("No such gig found, please try again");
+      return next(new ErrorHandler("No such gig found, please try again"), 400);
     }
 
     const orderIds = gig.orders.map((order) => order._id);
@@ -525,8 +527,7 @@ export const deleteUserGig = asyncHandler(async (req, res) => {
 
     res.status(200).json({ message: "Gig deleted successfully" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error for deleting gig" });
+    return next(new ErrorHandler("Internal server error."), 500);
   }
 });
 
@@ -576,7 +577,7 @@ const searchQueryService = (
       },
     },
     {
-      $unwind:"$createdBy"
+      $unwind: "$createdBy",
     },
     {
       $lookup: {
@@ -588,7 +589,6 @@ const searchQueryService = (
     },
     { $match: matchQuery },
   ];
-  
 
   return aggregateQuery;
 };
@@ -627,7 +627,7 @@ const aggregateQueryCount = (
     query.push({ "reviews.rating": parseInt(rating) });
   }
 
-  const matchQuery = { $or:query };
+  const matchQuery = { $or: query };
   const aggregateQuery = [
     {
       $lookup: {
@@ -652,3 +652,11 @@ const aggregateQueryCount = (
   ];
   return aggregateQuery;
 };
+
+
+async function compareArrays(array1, array2) {
+  const uniqueObjects = (arr1, arr2) => arr1.filter(obj1 => !arr2.some(obj2 => obj1.url === obj2.url && obj1.public_id === obj2.public_id));
+
+  const differentObjects = [...uniqueObjects(array1, array2), ...uniqueObjects(array2, array1)];
+  return differentObjects;
+}

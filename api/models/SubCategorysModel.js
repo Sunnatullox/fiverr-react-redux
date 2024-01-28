@@ -9,8 +9,12 @@ const subCategorySchema = new mongoose.Schema({
   description: String,
   slug: String,
   logo: {
-    type: String,
-    default: "",
+    public_id: {
+      type: String,
+    },
+    url: {
+      type: String,
+    },
   },
   isPopular: {
     type: Boolean,

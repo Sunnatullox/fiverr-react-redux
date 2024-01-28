@@ -2,34 +2,26 @@ import { compare } from "bcrypt";
 import asyncHandler from "express-async-handler";
 import { generatePassword } from "../utils/hashPass.js";
 import { createToken } from "../utils/createToken.js";
-import { renameSync } from "fs";
 import User from "../models/UserModel.js";
+import {uploadFileToFirebaseStorage} from '../utils/firebase.js'
+import ErrorHandler from "../middleware/ErrorHandler.js";
 
 export const signUp = asyncHandler(async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     if (!password) {
-      res.status(400);
-      const err =  new Error("Please enter your password");
-      next(err);
-      throw err;
+      return next(new ErrorHandler("Please enter your password",400));
     }
 
     if (!email) {
-      res.status(400);
-      const err =  new Error("Please enter your email address");
-      next(err);
-      throw err;
+      return next(new ErrorHandler("Please enter your email address",400));
     }
 
     const findUser = await User.findOne({ email });
     
     if (findUser) {
-      res.status(400)
-      const err = new Error("Sorry, email already exists, please try again");
-      next(err)
-      throw err
+      return next(new ErrorHandler("Sorry, email already exists, please try again",400));
     }
 
     const user = new User({
@@ -42,33 +34,32 @@ export const signUp = asyncHandler(async (req, res, next) => {
     if (savedUser) {
       res.status(201).json({status: true, message:"Sign Up successfully"});
     } else {
-      res.status(400);
-      const err  = new Error("Failed to save user");
-      next(err);
-      throw err
+      return next(new ErrorHandler("Failed to save user",400));
     }
   } catch (error) {
-    res.status(500);
-    throw new Error("Internal server error");
+    return next(new ErrorHandler("Internal server error",500));
   }
 });
 
 export const login = asyncHandler(async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (!password) throw new Error("Please enter a password");
-    if (!email) throw new Error("Please enter your email");
+    if (!password)return next(new ErrorHandler("Please enter a password",400));
+    if (!email) return next(new ErrorHandler("Please enter your email",400));
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      res.status(401);
-      throw new Error("Sorry, wrong email or password, please try again");
+      return next(new ErrorHandler("Sorry, wrong email or password, please try again",400))
+    }
+
+    if(!user.password){
+      return next(new ErrorHandler("sorry, you can only login through google",400));
     }
 
     const passwordMatched = await compare(password, user.password);
 
-    if (!passwordMatched) throw new Error("Invalid password");
+    if (!passwordMatched) return next(new ErrorHandler("Invalid password",400));
 
     const jwtToken = await createToken(user.email, user._id);
     return res.json({
@@ -76,8 +67,7 @@ export const login = asyncHandler(async (req, res, next) => {
       jwt: jwtToken,
     });
   } catch (error) {
-    console.log(error);
-    throw new Error(error);
+    return next(new ErrorHandler("Internal server error",500));
   }
 });
 
@@ -103,8 +93,7 @@ export const getUserInfo = asyncHandler(async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.log(error);
-    throw new Error("Internal server Error.");
+    return next(new ErrorHandler("Internal server error",500));
   }
 });
 
@@ -115,7 +104,7 @@ export const setUserInfo = asyncHandler(async (req, res, next) => {
     const user = await User.findById(req.user._id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return next(new ErrorHandler("User not found",400));
     }
 
     if (userName) {
@@ -144,8 +133,7 @@ export const setUserInfo = asyncHandler(async (req, res, next) => {
 
     return res.json("Profile data updated successfully");
   } catch (error) {
-    console.log(error);
-    throw new Error("Internal Server Error");
+    return next(new ErrorHandler("Internal server error",500));
   }
 });
 
@@ -155,13 +143,11 @@ export const userRoleEdit = asyncHandler(async (req, res) => {
     const user = await User.findById(_id);
 
     if (!user) {
-      res.status(400);
-      throw new Error("User not found");
+      return next(new ErrorHandler("User not found",400))
     }
 
     if (user.isProfileInfoSet === false) {
-      res.status(400);
-      throw new Error("User profile information is not set");
+      return next(new ErrorHandler("User profile information is not set",400));
     }
 
     if (user.role === "BUYER") {
@@ -174,32 +160,26 @@ export const userRoleEdit = asyncHandler(async (req, res) => {
       return res.status(200).json({ role: false });
     }
 
-    res.status(400);
-    throw new Error("User role could not be updated");
+    return next(new ErrorHandler("User role could not be updated",400));
   } catch (error) {
-    console.log(error);
-    throw new Error("Internal Server Error");
+    return next(new ErrorHandler("Internal server error",500));
   }
 });
 
 export const setUserImage = asyncHandler(async (req, res, next) => {
   try {
     if (!req.file) {
-      res.status(400);
-      throw new Error("Image not included");
+      return next(new ErrorHandler("Image not included",400));
     }
-    const date = Date.now();
-    let fileName = "uploads/profiles/" + date + req.file.originalname;
-    renameSync(req.file.path, fileName);
-
+    
+    const image = await uploadFileToFirebaseStorage(req.file);
     await User.findByIdAndUpdate(req.user._id, {
-      profileImage: fileName,
+      profileImage:image,
     });
 
-    return res.json({ img: fileName });
+    return res.json({ img: image });
   } catch (error) {
-    console.log(error);
-    throw new Error("Internal server error");
+    return next(new ErrorHandler("Internal server error",500));
   }
 });
 
@@ -251,7 +231,6 @@ export const signInGoogleAuth = asyncHandler(async (req, res, next) => {
    }
 
   } catch (error) {
-    console.log(error)
-    throw new Error("Internal Server Error.");
+    return next(new ErrorHandler("Internal server error",500));
   }
 });

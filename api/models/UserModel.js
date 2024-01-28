@@ -13,7 +13,14 @@ const userSchema = new mongoose.Schema({
   },
   fullname: String,
   description: String,
-  profileImage: String,
+  profileImage: {
+    public_id: {
+      type: String,
+    },
+    url: {
+      type: String,
+    },
+  },
   role: {
     type: String,
     enum: ['ADMIN', 'SELLER', 'BUYER'],

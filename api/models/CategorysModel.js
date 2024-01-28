@@ -10,7 +10,14 @@ const categorySchema = new mongoose.Schema({
     unique: true,
   },
   slug: String,
-  logo: String,
+  logo: {
+    public_id: {
+      type: String,
+    },
+    url: {
+      type: String,
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,

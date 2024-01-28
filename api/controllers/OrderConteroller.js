@@ -5,21 +5,21 @@ import Gig from "../models/GigsModel.js";
 import Order from "../models/OrderModel.js";
 import User from "../models/UserModel.js";
 
-const stripe = new Stripe("sk_test_4eC39HqLyjWDarjtT1zdp7dc");
+
+
+const stripe = new Stripe(process.env.STRIPE_SECRET);
 
 export const createOrder = asyncHandler(async (req, res, next) => {
   try {
     if (!req.body.gigId) {
-      res.status(400);
-      throw new Error("You must provide a valid gigId");
+      return next(new ErrorHandler("You must provide a valid gigId",400));
     }
 
     const { gigId } = req.body;
     const gig = await Gig.findById({ _id: gigId });
 
     if (!gig) {
-      res.status(404);
-      throw new Error("Gig not found");
+      return next(new ErrorHandler("Gig not found",400));
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -48,8 +48,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
 export const confirmOrder = asyncHandler(async (req, res, next) => {
   try {
     if (!req.body.paymentIntent) {
-      res.status(400);
-      throw new Error("Payment intent missing from request body object");
+      return next(new ErrorHandler("Payment intent missing from request body object",400));
     }
     const { paymentIntent } = req.body;
     const order = await Order.findOneAndUpdate(
@@ -60,8 +59,7 @@ export const confirmOrder = asyncHandler(async (req, res, next) => {
       { new: true }
     );
     if (!order) {
-      res.status(404);
-      throw new Error("Order not found");
+      return next(new ErrorHandler("Order not found",400));
     }
     await User.findByIdAndUpdate(
       req.user._id,
@@ -183,8 +181,7 @@ export const getSillerNotifications = asyncHandler(async (req, res) => {
       res.json([]);
     }
   } catch (error) {
-    console.log(first);
-    throw new Error("Internal Server Error");
+    return next(new ErrorHandler("Internal Server Error",400));
   }
 });
 
@@ -196,8 +193,7 @@ export const getSillerOrderDetails = asyncHandler(async (req, res) => {
     await gigDetails.save();
     res.json(gigDetails);
   } catch (error) {
-    console.log(error);
-    throw new Error("Internal server error.");
+    return next(new ErrorHandler("Internal server error.",400));
   }
 });
 
@@ -216,7 +212,6 @@ export const sellerUploadFile = asyncHandler(async (req, res) => {
     );
     res.json(uploadFile);
   } catch (error) {
-    console.log(error);
-    throw new Error("Internal Server Error.");
+    return next(new ErrorHandler("Internal Server Error.",400));
   }
 });

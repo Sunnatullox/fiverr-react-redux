@@ -134,7 +134,6 @@ export const getSellerData = asyncHandler(async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.log(error);
-    throw new Error("Internal server error.");
+    return next(new ErrorHandler("Internal server error.",500));
   }
 });

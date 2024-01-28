@@ -6,7 +6,7 @@ const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => {
     <button
       {...props}
       className={`slick-prev slick-arrow ${
-        currentSlide === 0 ? "slick-disabled hidden" : ""
+        currentSlide === 0 ? "slick-disabled" : ""
       }`}
       // style={ currentSlide === 0 ? { display:"none"}: {}}
       aria-hidden="true"
@@ -23,7 +23,7 @@ const SlickArrowRight = ({ currentSlide, slideCount, ...props }) => {
     return (
         <button 
         {...props}
-        className={`slick-next slick-arrow ${currentSlide === slideCount -1 ? "slick-disabled hidden" : ""}`}
+        className={`slick-next slick-arrow ${currentSlide === slideCount -1 ? "slick-disabled" : ""}`}
         aria-hidden="true"
         // style={currentSlide === slideCount -1 ? { display:"none"} : {}}
         aria-disabled={currentSlide === slideCount -1 ? true : false}
@@ -47,36 +47,42 @@ export const settings = {
     {
       breakpoint: 2820,
       settings: {
+        initialSlide: 0,
         slidesToShow: 15,
       },
     },
     {
       breakpoint: 1429,
       settings: {
+        initialSlide: 0, 
         slidesToShow: 8.5,
       },
     },
     {
       breakpoint: 1224,
       settings: {
+        initialSlide: 0,
         slidesToShow: 6.5,
       },
     },
     {
       breakpoint: 900,
       settings: {
+        initialSlide: 0,
         slidesToShow: 5,
       },
     },
     {
       breakpoint: 600,
       settings: {
+        initialSlide: 0,
         slidesToShow: 3,
       },
     },
     {
       breakpoint: 480,
       settings: {
+        initialSlide: 0,
         slidesToShow: 2,
       },
     },
