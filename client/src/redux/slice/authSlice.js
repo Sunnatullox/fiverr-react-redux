@@ -1,5 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { handleRegisterService, handleLoginService } from "../service/authService";
+import {
+  handleRegisterService,
+  handleLoginService,
+} from "../service/authService";
 
 const initialState = {
   showLogin: false,
@@ -27,23 +30,26 @@ export const handleRegister = createAsyncThunk(
   "auth/register",
   async (data, thunkApi) => {
     try {
-      const { data: resData } =  await handleRegisterService(data.values, data.types);
-      return resData
+      const { data: resData } = await handleRegisterService(data);
+      return resData;
     } catch (error) {
-      console.log(error)
-      return thunkApi.rejectWithValue(error);
+      console.log(error);
+      return thunkApi.rejectWithValue(error.response.data.message || error);
     }
   }
 );
 
-export const handleLogin = createAsyncThunk("auth/login", async(data, thunkApi) => {
-  try {
-    const { data:userData} = await handleLoginService(data)
-    return userData
-  } catch (error) {
-    return thunkApi.rejectWithValue(error);
+export const handleLogin = createAsyncThunk(
+  "auth/login",
+  async (data, thunkApi) => {
+    try {
+      const { data: userData } = await handleLoginService(data);
+      return userData;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.response.data.message || error);
+    }
   }
-})
+);
 
 const showAuthPage = createSlice({
   name: "auth",
@@ -64,17 +70,29 @@ const showAuthPage = createSlice({
         state.isLoading = false;
         state.showRegister = false;
         state.showLogin = true;
-        state.isSuccess=true
+        state.isSuccess = true;
         state.message = action.payload.message;
-        // state.userInfo = action.payload.user;
-        // localStorage.setItem("userInfo", JSON.stringify(action.payload.user));
-        // localStorage.setItem("token", JSON.stringify(action.payload.jwt));
       })
       .addCase(handleRegister.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        console.log(action)
-        state.message = action.payload.response.data.message;
+        state.message = action.payload;
+      })
+      .addCase(handleLogin.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(handleLogin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.showLogin = false;
+        state.userInfo = action.payload.user;
+        localStorage.setItem("userInfo", JSON.stringify(action.payload.user));
+        localStorage.setItem("token", JSON.stringify(action.payload.jwt));
+      })
+      .addCase(handleLogin.rejected, (state, action) => {
+        console.log(action);
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
       });
   },
 });

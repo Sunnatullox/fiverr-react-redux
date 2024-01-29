@@ -10,6 +10,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import AuthWrapper from "./pages/AuthWrapper";
 import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const dispatch = useDispatch();
@@ -30,19 +31,7 @@ function App() {
         <AuthWrapper type={showLogin ? "login" : "register"} />
       ) : null}
       <Footer />
-      <ToastContainer
-      position="top-right"
-      autoClose={5000}
-      hideProgressBar={false}
-      newestOnTop={false}
-      closeOnClick
-      rtl={false}
-      pauseOnFocusLoss
-      draggable
-      pauseOnHover
-      theme="light"
-        transition="Bounce"
-      />
+      <ToastContainer />
     </BrowserRouter>
   );
 }

@@ -14,7 +14,7 @@ export const getCategorys = createAsyncThunk("categorys/get", async (thunkApi) =
   try {
     return await handleGetCategorys();
   } catch (error) {
-    return thunkApi.rejectWithValue(error);
+    return thunkApi.rejectWithValue(error.response.data.message || error);
   }
 });
 
@@ -22,7 +22,7 @@ export const getPopularCategorys = createAsyncThunk("categorys/get-popular", asy
   try {
     return await getPopularCategoryService()
   } catch (error) {
-    return thunkApi.rejectWithValue(error);
+    return thunkApi.rejectWithValue(error.response.data.message || error);
   }
 })
 
@@ -41,7 +41,7 @@ export const categorysSlice = createSlice({
         state.isSuccess=true
       }).addCase(getCategorys.rejected, (state, action) =>{
         state.isLoading=false,
-        state.isError = action.error
+        state.isError = action.payload
       }).addCase(getPopularCategorys.pending, (state) => {
         state.isLoading=true
       }).addCase(getPopularCategorys.fulfilled,(state,action) =>{
@@ -51,7 +51,7 @@ export const categorysSlice = createSlice({
       }).addCase(getPopularCategorys.rejected, (state, action) => {
         state.isLoading=false,
         state.isError=true
-        state.message=action.error
+        state.message=action.payload
       });
   },
 });

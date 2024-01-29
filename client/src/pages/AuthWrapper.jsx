@@ -3,13 +3,14 @@ import { Close, Facebook, Google } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import {
   handleLogin,
+  handleRegister,
   handleShowLogin,
   handleShowRegister,
 } from "../redux/slice/authSlice";
 import { useSelector } from "react-redux";
 import * as yup from "yup";
 import { useFormik } from "formik";
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 
 const authSchema = yup.object().shape({
   email: yup
@@ -71,7 +72,7 @@ function AuthWrapper({ type }) {
       formik.setFieldValue("email", "");
       formik.setFieldValue("password", "");
     }
-  }, [isSuccess, isError]);
+  }, [isSuccess, message]);
 
   useEffect(() => {
     if(isError) {
@@ -82,7 +83,11 @@ function AuthWrapper({ type }) {
 
   function handleAuth(data) {
     if (data.email.trim() !== "" && data.password.trim() !== "")
-      dispatch(handleLogin({ values: data, type }));
+      if(type === "login") {
+        dispatch(handleLogin(data));
+      }else{
+        dispatch(handleRegister(data));
+      }
   }
 
   const authModalHidden = () => {
