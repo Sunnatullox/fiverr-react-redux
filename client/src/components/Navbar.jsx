@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { handleShowLogin, handleShowRegister } from "../redux/slice/authSlice";
 import { useSelector } from "react-redux";
 import { FavoriteBorder } from "@mui/icons-material";
+import MessageNatification from "./Notification/MessageNatification";
 
 function Navbar() {
   const [navFixed, setNavFixed] = useState(false);
@@ -135,6 +136,9 @@ function Navbar() {
                 <Link to="https://pro.fiverr.com/?utm_source=google&utm_medium=cpc-brand&utm_campaign=G_ROW-EN_Brand&utm_term=fiverr_business_exact&utm_content=AdID^654908055096^Keyword^fiverr%20business^Placement^^Device^c&caid=406997588&agid=124913637053&ad_id=654908055096&kw=fiverr%20business&lpcat=br_general&gclsrc=aw.ds&&utm_source=google&utm_medium=cpc-brand&utm_campaign=G_ROW-EN_Brand&utm_term=fiverr%2dbusiness%5fexact&utm_content=AdID^654908055096^Keyword^fiverr%20business^Placement^^Device^c&caid=406997588&agid=124913637053&ad_id=654908055096&kw=fiverr%20business&lpcat=br_general&show_join=true&gad_source=1&gclid=CjwKCAiAtt2tBhBDEiwALZuhAKfwd4QSiYttgp0tZPwpz0Keuwrm5nkxcXKrSIsgfld_8rYhUfaDOBoCG0oQAvD_BwE">
                   Fiverr businis
                 </Link>
+              </li>
+              <li className="cursor-pointer">
+                <MessageNatification />
               </li>
               <li
                 onClick={() => navigation("/wishlist")}
