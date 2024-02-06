@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   handleRegisterService,
   handleLoginService,
+  userUpdateInfo,
 } from "../service/authService";
 
 const initialState = {
@@ -43,8 +44,26 @@ export const handleLogin = createAsyncThunk(
   "auth/login",
   async (data, thunkApi) => {
     try {
-      const { data: userData } = await handleLoginService(data);
-      return userData;
+      const {
+        data: { user, jwt },
+      } = await handleLoginService(data);
+      data.setCookie("token", jwt);
+      return user;
+    } catch (error) {
+      console.log(error);
+      return thunkApi.rejectWithValue(error.response.data.message || error);
+    }
+  }
+);
+
+export const handleSetUserInfo = createAsyncThunk(
+  "auth/set-user-info",
+  async (data, thunkApi) => {
+    try {
+      const {
+        data: { img },
+      } = await userUpdateInfo(data);
+      return img;
     } catch (error) {
       return thunkApi.rejectWithValue(error.response.data.message || error);
     }
@@ -84,13 +103,25 @@ const showAuthPage = createSlice({
       .addCase(handleLogin.fulfilled, (state, action) => {
         state.isLoading = false;
         state.showLogin = false;
-        state.userInfo = action.payload.user;
-        localStorage.setItem("userInfo", JSON.stringify(action.payload.user));
-        localStorage.setItem("token", JSON.stringify(action.payload.jwt));
+        state.userInfo = action.payload;
+        localStorage.setItem("userInfo", JSON.stringify(action.payload));
       })
       .addCase(handleLogin.rejected, (state, action) => {
-        console.log(action);
         state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      .addCase(handleSetUserInfo.pending, (state) => {
+        state.userUpdateLoading = true;
+      })
+      .addCase(handleSetUserInfo.fulfilled, (state, action) => {
+        state.userUpdateLoading = false;
+        state.userInfo = {
+          ...state.userInfo,
+          image: action.payload.length ? action.payload : null,
+        };
+      }).addCase(handleSetUserInfo.rejected, (state, action) => {
+        state.userUpdateLoading = false;
         state.isError = true;
         state.message = action.payload;
       });

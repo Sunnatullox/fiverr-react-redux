@@ -1,9 +1,6 @@
-import React, { useState } from "react";
-import Slider from "react-slick";
+import React from "react";
 import { useSelector } from "react-redux";
-import { breakpoints } from "../utils/categories";
-import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { breakpoints } from "../utils/data";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";

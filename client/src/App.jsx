@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import AuthWrapper from "./pages/AuthWrapper";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import Profile from "./pages/Profile";
 
 function App() {
   const dispatch = useDispatch();
@@ -26,6 +27,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
       {showLogin || showRegister ? (
         <AuthWrapper type={showLogin ? "login" : "register"} />

@@ -8,12 +8,30 @@ import { handleShowLogin, handleShowRegister } from "../redux/slice/authSlice";
 import { useSelector } from "react-redux";
 import { FavoriteBorder } from "@mui/icons-material";
 import MessageNatification from "./Notification/MessageNatification";
+import ProfileMenu from "./ProfileMenu";
+import Notifications from "./Notification/Notifications";
+import { useCookies } from "react-cookie";
 
 function Navbar() {
   const [navFixed, setNavFixed] = useState(false);
+  const [cookies] = useCookies();
+  const [isUserProfileMenuShow, setIsUserProfileMenuShow] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigation = useNavigate();
+
+  useEffect(() => {
+    const clickcedMenuShow = (e) => {
+      e.stopPropagation();
+      if (isUserProfileMenuShow) setIsUserProfileMenuShow(false);
+    };
+    if (isUserProfileMenuShow)
+      window.addEventListener("click", clickcedMenuShow);
+
+    return () => {
+      window.removeEventListener("click", clickcedMenuShow);
+    };
+  }, [isUserProfileMenuShow]);
 
   useEffect(() => {
     const positionNavbar = () => {
@@ -35,6 +53,7 @@ function Navbar() {
   const handleSignup = () => {
     dispatch(handleShowRegister(true));
   };
+
 
   const link = [
     {
@@ -69,6 +88,31 @@ function Navbar() {
     },
   ];
 
+  const userProfileMenu = [
+    {
+      name: "Profile",
+      callback: (e) => {
+        e.stopPropagation();
+        setIsUserProfileMenuShow(false);
+        navigation("/profile");
+      },
+    },
+    {
+      name: "To be a Seller",
+      callback: (e) => {
+        e.stopPropagation();
+        setIsUserProfileMenuShow(false);
+      },
+    },
+    {
+      name: "Logout",
+      callback: (e) => {
+        e.stopPropagation();
+        setIsUserProfileMenuShow(false);
+      },
+    },
+  ];
+
   return (
     <div>
       <div
@@ -98,7 +142,7 @@ function Navbar() {
           </button>
         </div>
         <nav>
-          {!userInfo ? (
+          {!userInfo || !cookies.token ? (
             <ul className="flex list-none gap-3 list-image-none min-w-max">
               {link.map(({ linkName, handler, type }) => {
                 return (
@@ -131,11 +175,14 @@ function Navbar() {
               })}
             </ul>
           ) : (
-            <ul className="flex list-none gap-3 list-image-none min-w-max items-center" >
+            <ul className="flex list-none gap-3 list-image-none min-w-max items-center">
               <li className="cursor-pointer text-[#3631c9] font-medium">
                 <Link to="https://pro.fiverr.com/?utm_source=google&utm_medium=cpc-brand&utm_campaign=G_ROW-EN_Brand&utm_term=fiverr_business_exact&utm_content=AdID^654908055096^Keyword^fiverr%20business^Placement^^Device^c&caid=406997588&agid=124913637053&ad_id=654908055096&kw=fiverr%20business&lpcat=br_general&gclsrc=aw.ds&&utm_source=google&utm_medium=cpc-brand&utm_campaign=G_ROW-EN_Brand&utm_term=fiverr%2dbusiness%5fexact&utm_content=AdID^654908055096^Keyword^fiverr%20business^Placement^^Device^c&caid=406997588&agid=124913637053&ad_id=654908055096&kw=fiverr%20business&lpcat=br_general&show_join=true&gad_source=1&gclid=CjwKCAiAtt2tBhBDEiwALZuhAKfwd4QSiYttgp0tZPwpz0Keuwrm5nkxcXKrSIsgfld_8rYhUfaDOBoCG0oQAvD_BwE">
                   Fiverr businis
                 </Link>
+              </li>
+              <li className="cursor-pointer">
+              <Notifications />
               </li>
               <li className="cursor-pointer">
                 <MessageNatification />
@@ -152,7 +199,14 @@ function Navbar() {
               >
                 Orders
               </li>
-              <li title="Profile" className="cursor-pointer">
+              <li
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsUserProfileMenuShow(true);
+                }}
+                title="Profile"
+                className="cursor-pointer"
+              >
                 {userInfo?.image ? (
                   <img
                     src={userInfo.image.url}
@@ -164,9 +218,9 @@ function Navbar() {
                 ) : (
                   <div className="bg-purple-500 h-10 w-10 flex items-center justify-center rounded-full relative">
                     <span className="text-xl text-white">
-                      {userInfo && userInfo?.email && (
-                        userInfo.email.split("")[0].toUpperCase()
-                      ) }
+                      {userInfo &&
+                        userInfo?.email &&
+                        userInfo.email.split("")[0].toUpperCase()}
                     </span>
                   </div>
                 )}
@@ -174,6 +228,7 @@ function Navbar() {
             </ul>
           )}
         </nav>
+        {isUserProfileMenuShow && <ProfileMenu menuData={userProfileMenu} />}
       </div>
       <HeaderMenu show={navFixed} />
     </div>

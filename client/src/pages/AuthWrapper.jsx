@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import { toast } from 'react-toastify';
+import { useCookies } from "react-cookie";
 
 const authSchema = yup.object().shape({
   email: yup
@@ -21,6 +22,7 @@ const authSchema = yup.object().shape({
 });
 
 function AuthWrapper({ type }) {
+  const [cookies, setCookie] = useCookies()
   const [errorMessage, setErrorMessage] = useState(null);
   const { showLogin, showRegister, isSuccess, message, isError } = useSelector(
     (state) => state.auth
@@ -84,7 +86,7 @@ function AuthWrapper({ type }) {
   function handleAuth(data) {
     if (data.email.trim() !== "" && data.password.trim() !== "")
       if(type === "login") {
-        dispatch(handleLogin(data));
+        dispatch(handleLogin({...data,setCookie}));
       }else{
         dispatch(handleRegister(data));
       }
